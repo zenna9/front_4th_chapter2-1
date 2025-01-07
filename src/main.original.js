@@ -157,7 +157,7 @@ function calcTotalPrice() {
   renderBonusPts();
 }
 
-//보너스 포인트 계산
+//보너스 포인트 계산 + 렌더
 function renderBonusPts() {
   bonusPts = Math.floor(totalPrice / 1000);
 
