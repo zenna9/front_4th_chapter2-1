@@ -111,58 +111,65 @@ function setSaleItemDropbox() {
 
 // 장바구니 총금액 계산
 function calcTotalPrice() {
+  itemCnt = 0; // 장바구니 총 수량?
   totalPrice = 0;
-  itemCnt = 0;
-  let cartItems = cartItem_Elmt.children;
-  let subTot = 0;
-  for (let i = 0; i < cartItems.length; i++) {
-    (function () {
-      let curItem;
-      for (let j = 0; j < saleItemList.length; j++) {
-        if (saleItemList[j].id === cartItems[i].id) {
-          curItem = saleItemList[j];
-          break;
-        }
-      }
-      let q = parseInt(
-        cartItems[i].querySelector('span').textContent.split('x ')[1]
-      );
-      let itemTot = curItem.price * q;
-      let disc = 0;
-      itemCnt += q;
-      subTot += itemTot;
-      if (q >= 10) {
-        if (curItem.id === 'p1') disc = 0.1;
-        else if (curItem.id === 'p2') disc = 0.15;
-        else if (curItem.id === 'p3') disc = 0.2;
-        else if (curItem.id === 'p4') disc = 0.05;
-        else if (curItem.id === 'p5') disc = 0.25;
-      }
-      totalPrice += itemTot * (1 - disc);
-    })();
+  let cartItemList_Elmt = cartItem_Elmt.children;
+  let subTot = 0; // 이게 진짜 뭘까?
+  for (const cartItem_Elmt of cartItemList_Elmt) {
+    // cartItemList_Elmt.forEach((cartItem_Elmt) => {
+    // var curItem;
+    // 상품 리스트에서 id가 동일한 걸 찾아서 가져옴
+    // for (var j=0; j < prodList.length; j++) {
+    //   if(prodList[j].id === cartItems[i].id) {
+    //     curItem=prodList[j];
+    //     break;
+    //   }
+    // }
+    let curItem = saleItemList[saleItemIdx[cartItem_Elmt.id]];
+    let q = parseInt(
+      cartItem_Elmt.querySelector('span').textContent.split('x ')[1]
+    );
+    let totalPricePerItem = curItem.price * q;
+    let disc = 0;
+    itemCnt += q;
+    subTot += totalPricePerItem;
+    if (q >= 10) {
+      if (curItem.id === 'p1') disc = 0.1;
+      else if (curItem.id === 'p2') disc = 0.15;
+      else if (curItem.id === 'p3') disc = 0.2;
+      else if (curItem.id === 'p4') disc = 0.05;
+      else if (curItem.id === 'p5') disc = 0.25;
+    }
+    totalPrice += totalPricePerItem * (1 - disc);
+    // })();
+    // }
   }
-  let discRate = 0;
+  let discountRate = 0;
   if (itemCnt >= 30) {
     let bulkDisc = totalPrice * 0.25;
     let itemDisc = subTot - totalPrice;
+
     if (bulkDisc > itemDisc) {
       totalPrice = subTot * (1 - 0.25);
-      discRate = 0.25;
+      discountRate = 0.25;
     } else {
-      discRate = (subTot - totalPrice) / subTot;
+      discountRate = (subTot - totalPrice) / subTot;
     }
   } else {
-    discRate = (subTot - totalPrice) / subTot;
+    discountRate = (subTot - totalPrice) / subTot;
   }
+
+  //화요일 세일
   if (new Date().getDay() === 2) {
-    totalPrice *= 1 - 0.1;
-    discRate = Math.max(discRate, 0.1);
+    totalPrice *= 0.9;
+    discountRate = Math.max(discountRate, 0.1);
   }
+
   sum.textContent = '총액: ' + Math.round(totalPrice) + '원';
-  if (discRate > 0) {
+  if (discountRate > 0) {
     let span = document.createElement('span');
     span.className = 'text-green-500 ml-2';
-    span.textContent = '(' + (discRate * 100).toFixed(1) + '% 할인 적용)';
+    span.textContent = '(' + (discountRate * 100).toFixed(1) + '% 할인 적용)';
     sum.appendChild(span);
   }
   updateStockInfo();
