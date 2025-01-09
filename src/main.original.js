@@ -2,7 +2,7 @@ let itemDropbox_Elmt, addBtn, cartItem_Elmt, sum, stockInfo;
 let lastSel, // 장바구니에 가장 최근 담은 제품
   bonusPts = 0,
   totalPrice = 0,
-  itemCnt = 0;
+  cartTotalCnt = 0;
 
 let saleItemIdx = { p1: 0, p2: 1, p3: 2, p4: 3, p5: 4 };
 let saleItemList = [
@@ -111,67 +111,73 @@ function setSaleItemDropbox() {
 
 // 장바구니 총금액 계산
 function calcTotalPrice() {
-  itemCnt = 0; // 장바구니 총 수량?
+  cartTotalCnt = 0; // 장바구니 총 수량?
   totalPrice = 0;
   let cartItemList_Elmt = cartItem_Elmt.children;
   let subTot = 0; // 이게 진짜 뭘까?
+
+  //상품별 할인율 계산
   for (const cartItem_Elmt of cartItemList_Elmt) {
-    // cartItemList_Elmt.forEach((cartItem_Elmt) => {
-    // var curItem;
-    // 상품 리스트에서 id가 동일한 걸 찾아서 가져옴
-    // for (var j=0; j < prodList.length; j++) {
-    //   if(prodList[j].id === cartItems[i].id) {
-    //     curItem=prodList[j];
-    //     break;
-    //   }
-    // }
-    let curItem = saleItemList[saleItemIdx[cartItem_Elmt.id]];
-    let q = parseInt(
+    let checkingItem = saleItemList[saleItemIdx[cartItem_Elmt.id]];
+    let checkingItemQuantity = parseInt(
       cartItem_Elmt.querySelector('span').textContent.split('x ')[1]
     );
-    let totalPricePerItem = curItem.price * q;
-    let disc = 0;
-    itemCnt += q;
+
+    let totalPricePerItem = checkingItem.price * checkingItemQuantity;
+    cartTotalCnt += checkingItemQuantity;
     subTot += totalPricePerItem;
-    if (q >= 10) {
-      if (curItem.id === 'p1') disc = 0.1;
-      else if (curItem.id === 'p2') disc = 0.15;
-      else if (curItem.id === 'p3') disc = 0.2;
-      else if (curItem.id === 'p4') disc = 0.05;
-      else if (curItem.id === 'p5') disc = 0.25;
+
+    let 상품별할인율 = 0;
+    if (checkingItemQuantity >= 10) {
+      switch (checkingItem.id) {
+        case 'p1':
+          상품별할인율 = 0.1;
+          break;
+        case 'p2':
+          상품별할인율 = 0.15;
+          break;
+        case 'p3':
+          상품별할인율 = 0.2;
+          break;
+        case 'p4':
+          상품별할인율 = 0.05;
+          break;
+        case 'p5':
+          상품별할인율 = 0.25;
+          break;
+      }
     }
-    totalPrice += totalPricePerItem * (1 - disc);
-    // })();
-    // }
+    totalPrice += totalPricePerItem * (1 - 상품별할인율);
   }
-  let discountRate = 0;
-  if (itemCnt >= 30) {
-    let bulkDisc = totalPrice * 0.25;
+
+  let 장바구니할인율 = 0;
+  if (cartTotalCnt >= 30) {
+    let 벌크할인가 = totalPrice * 0.25;
     let itemDisc = subTot - totalPrice;
 
-    if (bulkDisc > itemDisc) {
+    if (벌크할인가 > itemDisc) {
       totalPrice = subTot * (1 - 0.25);
-      discountRate = 0.25;
+      장바구니할인율 = 0.25;
     } else {
-      discountRate = (subTot - totalPrice) / subTot;
+      장바구니할인율 = (subTot - totalPrice) / subTot;
     }
   } else {
-    discountRate = (subTot - totalPrice) / subTot;
+    장바구니할인율 = (subTot - totalPrice) / subTot;
   }
 
   //화요일 세일
   if (new Date().getDay() === 2) {
     totalPrice *= 0.9;
-    discountRate = Math.max(discountRate, 0.1);
+    장바구니할인율 = Math.max(장바구니할인율, 0.1);
   }
 
-  sum.textContent = '총액: ' + Math.round(totalPrice) + '원';
-  if (discountRate > 0) {
-    let span = document.createElement('span');
-    span.className = 'text-green-500 ml-2';
-    span.textContent = '(' + (discountRate * 100).toFixed(1) + '% 할인 적용)';
-    sum.appendChild(span);
+  //렌더링
+  let sumInnerHtml = '총액: ' + Math.round(totalPrice) + '원';
+  // sum.textContent = sumInnerHtml;
+  if (장바구니할인율 > 0) {
+    sumInnerHtml += `<span class="text-green-500 ml-2">(${(장바구니할인율 * 100).toFixed(1)}% 할인 적용)</span>`;
   }
+  sum.textContent = sumInnerHtml;
   updateStockInfo();
   renderBonusPts();
 }
