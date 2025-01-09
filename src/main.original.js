@@ -112,7 +112,7 @@ function calcTotalPrice() {
   cartTotalCnt = 0; // 장바구니 총 수량?
   totalPrice = 0;
   let cartItemList_Elmt = cartItem_Elmt.children;
-  let subTot = 0; // 이게 진짜 뭘까?
+  let 할인전가격 = 0;
 
   //상품별 할인율 계산
   for (const cartItem_Elmt of cartItemList_Elmt) {
@@ -121,7 +121,7 @@ function calcTotalPrice() {
 
     let totalPricePerItem = checkingItem.price * checkingItemQuantity;
     cartTotalCnt += checkingItemQuantity;
-    subTot += totalPricePerItem;
+    할인전가격 += totalPricePerItem;
 
     let 상품별할인율 = 0;
     if (checkingItemQuantity >= 10) {
@@ -149,16 +149,16 @@ function calcTotalPrice() {
   let 장바구니할인율 = 0;
   if (cartTotalCnt >= 30) {
     let 벌크할인가 = totalPrice * 0.25;
-    let itemDisc = subTot - totalPrice;
+    let itemDisc = 할인전가격 - totalPrice;
 
     if (벌크할인가 > itemDisc) {
-      totalPrice = subTot * (1 - 0.25);
+      totalPrice = 할인전가격 * (1 - 0.25);
       장바구니할인율 = 0.25;
     } else {
-      장바구니할인율 = (subTot - totalPrice) / subTot;
+      장바구니할인율 = (할인전가격 - totalPrice) / 할인전가격;
     }
   } else {
-    장바구니할인율 = (subTot - totalPrice) / subTot;
+    장바구니할인율 = (할인전가격 - totalPrice) / 할인전가격;
   }
 
   //화요일 세일
@@ -169,9 +169,10 @@ function calcTotalPrice() {
 
   //렌더링
   let sumInnerHtml = '총액: ' + Math.round(totalPrice) + '원';
-  // sum.textContent = sumInnerHtml;
   if (장바구니할인율 > 0) {
-    sumInnerHtml += `<span class="text-green-500 ml-2">(${(장바구니할인율 * 100).toFixed(1)}% 할인 적용)</span>`;
+    sumInnerHtml += `<span class="text-green-500 ml-2">(${(장바구니할인율 * 100).toFixed(
+      1
+    )}% 할인 적용)</span>`;
   }
   totalPrice_Elmt.textContent = sumInnerHtml;
   updateStockInfo();
