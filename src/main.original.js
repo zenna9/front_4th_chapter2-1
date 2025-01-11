@@ -67,7 +67,7 @@ function main() {
         alert('번개세일! ' + luckyItem.name + '이(가) 20% 할인 중입니다!');
         setSaleItemDropbox();
       }
-    }, 30000); //30s
+    }, 30_000); //30s
   }, Math.random() * 10000);
 
   // 구매 제안 팝업
